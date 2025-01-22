@@ -1,5 +1,10 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
+from stock_market_ai_agents.tools.browser_tools import scrape_and_summarize_website
+from stock_market_ai_agents.tools.search_tools import search_internet,search_news
+from stock_market_ai_agents.tools.calculator_tools import calculate
+from stock_market_ai_agents.tools.finance_tools import search_annual_income_statement, search_quarterly_income_statement, search_stock_fundamentals
+
 
 # If you want to run a snippet of code before or after the crew starts, 
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -21,21 +26,43 @@ class StockMarketAiAgents():
 	def financial_analyst(self) -> Agent:
 		return Agent(
 			config=self.agents_config['financial_analyst'],
-			verbose=True
+			verbose=True,
+			tools=[
+				scrape_and_summarize_website,
+				search_internet,
+				calculate,
+				search_annual_income_statement,
+				search_quarterly_income_statement,
+				search_stock_fundamentals
+			],
 		)
 
 	@agent
 	def research_analyst(self) -> Agent:
 		return Agent(
 			config=self.agents_config['research_analyst'],
-			verbose=True
+			verbose=True,
+			tools=[
+				scrape_and_summarize_website,
+				search_internet,
+				calculate,
+				search_annual_income_statement,
+				search_quarterly_income_statement,
+				search_stock_fundamentals
+			],
 		)
   
 	@agent
 	def investment_advisor(self) -> Agent:
 		return Agent(
 			config=self.agents_config['investment_advisor'],
-			verbose=True
+			verbose=True,
+			tools=[
+				scrape_and_summarize_website,
+				search_internet,
+				search_news,
+				calculate
+			],
 		)
 
 	# To learn more about structured task outputs, 
