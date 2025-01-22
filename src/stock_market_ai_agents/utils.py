@@ -6,6 +6,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
+from langchain_ollama import OllamaLLM
 import os
 from datetime import date
 
@@ -99,12 +100,7 @@ RAG_GENERATOR = """
 """
 
 def predict(question, vector_index, prompt):
-    llm = ChatOpenAI(
-        model="gpt-40-mini",
-        temperature=0.1,
-        max_retries=2,
-        api_key=os.environ.get("OPENAI_API_KEY")
-    )
+    llm = OllamaLLM(model="ollama/deepseek-r1:7b")
 
 
     QA_CHAIN_PROMPT = PromptTemplate.from_template(prompt)

@@ -6,15 +6,13 @@ from bs4 import BeautifulSoup
 #from langchain_google_genai import (ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings,HarmBlockThreshold,
 #    HarmCategory,)
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_ollama import OllamaLLM
 load_dotenv()
 
-llm = ChatOpenAI(
-    model="gpt-40-mini",
-    temperature=0.1,
-    max_retries=2,
-    api_key=os.environ.get("OPENAI_API_KEY")
-)
+llm = OllamaLLM(
+    model="ollama/deepseek-r1:7b",
+    base_url="http://localhost:11434"
+    )
 
 @tool("Scrape website content")
 def scrape_and_summarize_website(source_url: str) -> str:

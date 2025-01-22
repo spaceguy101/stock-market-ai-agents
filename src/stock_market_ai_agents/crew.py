@@ -4,11 +4,13 @@ from stock_market_ai_agents.tools.browser_tools import scrape_and_summarize_webs
 from stock_market_ai_agents.tools.search_tools import search_internet,search_news
 from stock_market_ai_agents.tools.calculator_tools import calculate
 from stock_market_ai_agents.tools.finance_tools import search_annual_income_statement, search_quarterly_income_statement, search_stock_fundamentals
-
+from crewai import LLM
 
 # If you want to run a snippet of code before or after the crew starts, 
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+
+llm = LLM(model="ollama/deepseek-r1:7b")
 
 @CrewBase
 class StockMarketAiAgents():
@@ -35,6 +37,8 @@ class StockMarketAiAgents():
 				search_quarterly_income_statement,
 				search_stock_fundamentals
 			],
+			llm=llm,
+         	memory=True
 		)
 
 	@agent
@@ -50,6 +54,8 @@ class StockMarketAiAgents():
 				search_quarterly_income_statement,
 				search_stock_fundamentals
 			],
+			llm=llm,
+			memory=True
 		)
   
 	@agent
@@ -63,6 +69,8 @@ class StockMarketAiAgents():
 				search_news,
 				calculate
 			],
+			llm=llm,
+         	memory=True
 		)
 
 	# To learn more about structured task outputs, 
