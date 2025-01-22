@@ -1,0 +1,26 @@
+[project]
+name = "stock_market_ai_agents"
+version = "0.1.0"
+description = "stock-market-ai-agents using crewAI"
+authors = [{ name = "Shreyas Ponkshe", email = "shreyasponkshe12345@gmail.com" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "bs4>=0.0.2",
+    "crewai[tools]>=0.98.0,<1.0.0",
+    "langchain-openai>=0.2.14",
+    "yfinance>=0.2.52",
+]
+
+[project.scripts]
+stock_market_ai_agents = "stock_market_ai_agents.main:run"
+run_crew = "stock_market_ai_agents.main:run"
+train = "stock_market_ai_agents.main:train"
+replay = "stock_market_ai_agents.main:replay"
+test = "stock_market_ai_agents.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
