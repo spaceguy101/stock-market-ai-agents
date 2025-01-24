@@ -1,8 +1,14 @@
-from crewai.tools import tool
+from typing import Type
+from crewai.tools import tool,BaseTool
 import yfinance as yf
 import json
 from datetime import datetime
 from ..utils import search
+import logging
+from pydantic import BaseModel, Field
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 income_stmt_keys = [
 "Tax Effect Of Unusual Items",
@@ -53,10 +59,12 @@ class FinanceTools:
         with open(file_path, 'w') as json_file:
             json.dump(data, json_file, indent=4)
 
+        logger.info(f"Storing financial data to {file_path}")
         print("JSON data has been stored in", file_path)
 
     @staticmethod
     def __embedding_search(data, ask):
+        logger.info(f"Performing embedding search for query: {ask}")
         FinanceTools.__store_financial_data(data, 'financial_data.json')
         return search(ask)
 
@@ -73,16 +81,18 @@ class FinanceTools:
             new_data.update(new_dict)
 
         new_json = json.dumps(new_data, indent=4)
+        logger.info("Preprocessing financial data")
         return new_json
 
-@tool("Search quarterly income statement")
-def search_quarterly_income_statement(query: dict) -> str:
-    """
+
+class SearchQuaterlyIncomeStatementInput(BaseModel):
+    company: str = Field(..., description="The company's stock symbol",examples=["RELIANCE"])
+    query: str = Field(..., description="The question you have about the company's quarterly income statement",examples=["What is the net income?"])
+
+class SearchQuaterlyIncomeStatement(BaseTool):
+    name: str = "Search quarterly income statement"
+    description: str = """
     Useful to search information for a given stock.
-    The input to this tool should be a pipe (|) separated text of
-    length two, representing the stock ticker you are interested and what
-    question you have from it.
-        For example, `[TICKER]|what was last quarter's revenue`.
 
     Available data for past 4 quarters: [
     "Tax Effect Of Unusual Items",
@@ -127,21 +137,23 @@ def search_quarterly_income_statement(query: dict) -> str:
     "Operating Revenue"
     ]
     """
-    global income_stmt_keys
-    stock, ask = query.split("|")
-    stock_data = yf.Ticker(f"{stock}.NS") # only NSE stocks
-    data = FinanceTools.preprocess(json.loads(stock_data.quarterly_income_stmt.to_json()))
-    answer = FinanceTools.__embedding_search(data, ask)
-    return answer
+    args_schema: Type[BaseModel] = SearchQuaterlyIncomeStatementInput
+
+    def _run(self, company:str, query:str) -> str:
+        global income_stmt_keys
+        stock = company
+        ask = query
+        stock_data = yf.Ticker(f"{stock}.NS") # only NSE stocks
+        data = FinanceTools.preprocess(json.loads(stock_data.quarterly_income_stmt.to_json()))
+        logger.info(f"Searching quarterly income statement for query: {query}")
+        answer = FinanceTools.__embedding_search(data, ask)
+        return answer
+
     
 @tool("Search stock fundamentals")
-def search_stock_fundamentals(query: dict) -> str:
+def search_stock_fundamentals(company:str,query: str) -> str:
     """
     Useful to search information for a given stock.
-    The input to this tool should be a pipe (|) separated text of
-    length two, representing the stock ticker you are interested and what
-    question you have from it.
-        For example, `[TICKER]|what is the priceToBook ratio?`.
 
     Available data for the stock: [
         'address1', 'address2', 'city', 'zip', 'country', 'phone', 'website', 
@@ -169,21 +181,19 @@ def search_stock_fundamentals(query: dict) -> str:
     ]
     """
     global income_stmt_keys
-    stock, ask = query.split("|")
-    stock = stock.split('.')[0]
+    stock = company
+    ask = query
     stock_data = yf.Ticker(f"{stock}.NS") # only NSE stocks
     data = stock_data.info
+    logger.info(f"Searching stock fundamentals for query: {query}")
     answer = FinanceTools.__embedding_search(data, ask)
     return answer
     
 @tool("Search annual income statement")
-def search_annual_income_statement(query: dict) -> str:
+def search_annual_income_statement(company:str,query:str) -> str:
     """
     Useful to search information for a given stock.
-    The input to this tool should be a pipe (|) separated text of
-    length two, representing the stock ticker you are interested and what
-    question you have from it.
-        For example, `[TICKER]|what was last year's revenue`.
+    The input to this tool should be a symbol and what question you have from it.
 
     Available data for past 4 years: [
     "Tax Effect Of Unusual Items",
@@ -229,8 +239,10 @@ def search_annual_income_statement(query: dict) -> str:
     ]
     """
     global income_stmt_keys
-    stock, ask = query.split("|")
+    stock = company
+    ask = query
     stock_data = yf.Ticker(f"{stock}.NS") # only NSE stocks
     data = FinanceTools.preprocess(json.loads(stock_data.income_stmt.to_json()))
+    logger.info(f"Searching annual income statement for query: {query}")
     answer = FinanceTools.__embedding_search(data, ask)
     return answer

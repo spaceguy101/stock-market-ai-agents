@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 import sys
 import warnings
-from datetime import datetime
+import logging
+from datetime import date
 from stock_market_ai_agents.crew import StockMarketAiAgents
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # This main file is intended to be a way for you to run your
 # crew locally, so refrain from adding unnecessary logic into this file.
@@ -12,12 +16,13 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # interpolate any tasks and agents information
 
 def run():
+    logger.info("Running the crew")
     """
     Run the crew.
     """
     inputs = {
-        'company': 'RELIANCE',
-        'current_year': str(datetime.now().year)
+        'company': 'INFOLLION',
+        'date': str(date.today())
     }
     
     try:
@@ -27,11 +32,12 @@ def run():
 
 
 def train():
+    logger.info("Training the crew")
     """
     Train the crew for a given number of iterations.
     """
     inputs = {
-        "company": "RELIANCE "
+        "company": "INFOLLION "
     }
     try:
         StockMarketAiAgents().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
@@ -40,6 +46,7 @@ def train():
         raise Exception(f"An error occurred while training the crew: {e}")
 
 def replay():
+    logger.info("Replaying the crew execution")
     """
     Replay the crew execution from a specific task.
     """
@@ -50,11 +57,12 @@ def replay():
         raise Exception(f"An error occurred while replaying the crew: {e}")
 
 def test():
+    logger.info("Testing the crew execution")
     """
     Test the crew execution and returns the results.
     """
     inputs = {
-        "company": "RELIANCE "
+        "company": "INFOLLION"
     }
     try:
         StockMarketAiAgents().crew().test(n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs)

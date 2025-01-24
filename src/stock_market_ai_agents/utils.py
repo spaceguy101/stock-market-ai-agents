@@ -4,9 +4,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_ollama import OllamaLLM
+from langchain_ollama import OllamaLLM,OllamaEmbeddings
 import os
 from datetime import date
 
@@ -100,7 +98,7 @@ RAG_GENERATOR = """
 """
 
 def predict(question, vector_index, prompt):
-    llm = OllamaLLM(model="ollama/deepseek-r1:7b")
+    llm = OllamaLLM(model="ollama/llama3.2:latest")
 
 
     QA_CHAIN_PROMPT = PromptTemplate.from_template(prompt)
@@ -138,7 +136,7 @@ def chunking():
 
 
 def init_vectorstore(texts):
-    embeddings = OpenAIEmbeddings()
+    embeddings = OllamaEmbeddings(model="ollama/all-minilm:latest")
     vector_index = Chroma.from_texts(texts, embeddings).as_retriever(search_kwargs={"k":10})
 
     return vector_index
